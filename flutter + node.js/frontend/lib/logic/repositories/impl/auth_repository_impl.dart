@@ -7,27 +7,30 @@ import 'package:py_sync/logic/repositories/auth_repository.dart';
 class AuthRepositoryImpl extends AuthRepository {
   final AuthApi authApi;
   AuthRepositoryImpl({required User? initalValue, required this.authApi})
-    : super(initalValue);
+    : super(initalValue) {
+    AuthRepository.currentUser = state;
+  }
 
   @override
   FutureOr<User> register(String username, String password) async {
-    if (state != null) return state!;
+    if (state != null) return AuthRepository.currentUser = state!;
     return handleErrors(() async {
       var jwtToken = await authApi.register(username, password);
       var newState = User(username: username, jwtToken: jwtToken);
       emit(newState);
-      return newState;
+      return AuthRepository.currentUser = newState;
     }, errorPrefix: 'Registration failed:');
   }
 
   @override
   FutureOr<User> login(String username, String password) async {
-    if (state != null) return state!;
+    if (state != null) return AuthRepository.currentUser = state!;
     return handleErrors(() async {
-      var jwtToken = await authApi.register(username, password);
+      var jwtToken = await authApi.login(username, password);
       var newState = User(username: username, jwtToken: jwtToken);
       emit(newState);
-      return newState;
+
+      return AuthRepository.currentUser = newState;
     }, errorPrefix: 'Login failed:');
   }
 
@@ -36,4 +39,10 @@ class AuthRepositoryImpl extends AuthRepository {
 
   @override
   User? fromJson(Map<String, dynamic>? json) => json == null ? null : User.fromJson(json);
+
+  @override
+  FutureOr<void> signOut() {
+    emit(null);
+    AuthRepository.currentUser = null;
+  }
 }

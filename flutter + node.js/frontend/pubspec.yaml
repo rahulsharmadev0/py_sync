@@ -18,14 +18,26 @@ dependencies:
   flutter_bloc: ^9.1.0
   retry: ^3.1.2
   hydrated_bloc: ^10.0.0
+  go_router: ^15.1.1
+  path_provider: ^2.1.5
+  flex_color_scheme: ^8.2.0
+  intl: ^0.20.2
+  flutter_suite:
+    git:
+      url: https://github.com/rahulsharmadev0/suite.git
+      ref: main
+      path: packages/flutter_suite
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   mockito: ^5.4.0
   build_runner: ^2.3.3
-
   flutter_lints: ^5.0.0
+  go_router_builder: ^2.8.2
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - assets/images/

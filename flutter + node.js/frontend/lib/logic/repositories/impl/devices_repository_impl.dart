@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:py_sync/logic/apis/devices_api.dart';
 import 'package:py_sync/logic/models/device.dart';
 import 'package:py_sync/logic/repositories/auth_repository.dart';

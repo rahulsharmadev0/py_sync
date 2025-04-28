@@ -5,7 +5,7 @@ import '../models/device.dart';
 class DevicesApi {
   final String baseUrl;
 
-  DevicesApi({required this.baseUrl});
+  const DevicesApi({required this.baseUrl});
 
   Future<List<Device>> getAllDevices(String token) async {
     final response = await http.get(

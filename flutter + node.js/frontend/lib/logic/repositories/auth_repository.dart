@@ -12,6 +12,5 @@ abstract class AuthRepository extends CachedState<User?> with ErrorHandlingMixin
 
   FutureOr<void> login(String username, String password);
 
-  FutureOr<void> signOut() async =>
-      UnimplementedError('signOut() has not been implemented.');
+  FutureOr<void> signOut();
 }

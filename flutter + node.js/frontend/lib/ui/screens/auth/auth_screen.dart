@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_suite/flutter_suite.dart';
 import 'package:py_sync/logic/repositories/auth_repository.dart';
 import 'package:py_sync/ui/screens/auth/auth_bloc.dart';
 import 'package:py_sync/ui/screens/auth/auth_form_state.dart';
@@ -85,7 +86,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                   ),
                   const SizedBox(height: 16),
                   const Text(
-                    'Admin Dashboard',
+                    'Admin Panel',
                     style: TextStyle(fontSize: 20, color: Colors.white70),
                   ),
                 ],
@@ -174,9 +175,25 @@ class AuthForm extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
+        BlocBuilder<AuthFormBloc, AuthFormState>(
+          buildWhen: (previous, current) => previous.formStatus != current.formStatus,
+          builder: (context, state) {
+            return Text(
+              '${state.formStatus.index == 0 ? 'Login' : 'Register'} to your Account',
+              style: context.$TxT.h2?.$bold,
+            );
+          },
+        ),
+        Gap(8),
+        Text(
+          'Please enter your credentials to continue',
+          style: context.$TxT.b2?.$regular,
+        ),
+
         // Tab bar for switching between login and register
         TabBar(
           controller: _tabController,
+          onTap: (value) => read.setFormStateEvent(FormStatus.values[value]),
           tabs: const [Tab(text: 'LOGIN'), Tab(text: 'REGISTER')],
         ),
         const SizedBox(height: 32),
@@ -191,11 +208,14 @@ class AuthForm extends StatelessWidget {
                 labelText: 'Username',
                 border: outlineInputBorder,
                 focusedBorder: outlineInputBorder2,
+                prefixIcon: const Icon(Icons.person),
               ),
               autofillHints: const [AutofillHints.username],
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter your username';
+                } else if (value.length < 3) {
+                  return 'Username must be at least 3 characters long';
                 }
                 return null;
               },
@@ -208,12 +228,15 @@ class AuthForm extends StatelessWidget {
                 labelText: 'Password',
                 border: outlineInputBorder,
                 focusedBorder: outlineInputBorder2,
+                prefixIcon: const Icon(Icons.lock),
               ),
               obscureText: true,
               autofillHints: const [AutofillHints.password],
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter your password';
+                } else if (value.length < 6) {
+                  return 'Password must be at least 6 characters long';
                 }
                 return null;
               },

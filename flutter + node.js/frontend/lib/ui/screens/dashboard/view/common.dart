@@ -95,12 +95,13 @@ class DeviceIdCell extends StatelessWidget {
         device.deviceId,
         style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.w500),
       ),
-      SizedBox(
-        height: 24,
-        child: FittedBox(
-          child: Tooltip(message: device.type, child: Chip(label: Text(device.name))),
+      if (context.$size.width > 900)
+        SizedBox(
+          height: 24,
+          child: FittedBox(
+            child: Tooltip(message: device.type, child: Chip(label: Text(device.name))),
+          ),
         ),
-      ),
     ];
     return Row(mainAxisSize: MainAxisSize.min, spacing: 8, children: children);
   }

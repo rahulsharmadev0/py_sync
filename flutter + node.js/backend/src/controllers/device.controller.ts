@@ -12,9 +12,94 @@ export class DeviceController {
 
   public getAllDevices = (req: Request, res: Response) => {
     try {
-      return res.status(200).json({
-        count: this.devices.length,
-        devices: this.devices,
+      const {
+        sync_status_code,
+        page = "1",
+        limit = "10",
+        sort_by = "last_sync_at",
+        order = "desc",
+      } = req.query;
+
+      // Start with all devices
+      let filteredDevices = [...this.devices];
+
+      //---------------
+      // Filtering logic
+      //---------------
+
+      if (sync_status_code) {
+        const filterValue = sync_status_code.toString();
+
+        // Handle negation (e.g., !200)
+        if (filterValue.startsWith("!")) {
+          const statusCode = parseInt(filterValue.substring(1));
+          filteredDevices = filteredDevices.filter(
+            (device) => device.sync_status_code !== statusCode
+          );
+        } else {
+          const statusCode = parseInt(filterValue);
+          filteredDevices = filteredDevices.filter(
+            (device) => device.sync_status_code === statusCode
+          );
+        }
+      }
+
+      //---------------
+      // Sorting logic
+      //---------------
+      if (
+        sort_by &&
+        (sort_by === "last_sync_at" || sort_by === "last_attempt_at")
+      ) {
+        filteredDevices.sort((a, b) => {
+          const dateA = a[sort_by as keyof Device] as string | null;
+          const dateB = b[sort_by as keyof Device] as string | null;
+
+          // Handle null values
+          if (dateA === null && dateB === null) return 0;
+          if (dateA === null) return order === "asc" ? -1 : 1;
+          if (dateB === null) return order === "asc" ? 1 : -1;
+
+          return order === "asc"
+            ? new Date(dateA).getTime() - new Date(dateB).getTime()
+            : new Date(dateB).getTime() - new Date(dateA).getTime();
+        });
+      }
+
+      //---------------
+      // Pagination logic
+      //---------------
+
+      const MAX_LIMIT = 100;
+      const limitNum = Math.min(
+        MAX_LIMIT,
+        Math.max(1, parseInt(limit as string) || 10)
+      );
+
+      // Total items
+      const totalItems = filteredDevices.length;
+      const totalPages = Math.ceil(totalItems / limitNum);
+
+      // pageNum if it's too high
+      const safePage = Math.min(
+        Math.max(1, parseInt(page as string) || 1),
+        totalPages || 1
+      );
+
+      // Calculate indexes
+      const startIndex = (safePage - 1) * limitNum;
+      const endIndex = Math.min(startIndex + limitNum, totalItems);
+
+      // Slice paginated data
+      const paginatedDevices = filteredDevices.slice(startIndex, endIndex);
+
+      // Return response
+      res.json({
+        page: safePage,
+        limit: limitNum,
+        totalItems,
+        totalPages,
+        data: paginatedDevices,
       });
     } catch (error) {
       console.error("Error fetching devices:", error);
@@ -42,8 +127,8 @@ export class DeviceController {
       // Update device sync status
       const now = new Date().toISOString();
 
-      // Simulate a successful sync 80% of the time, an error 20% of the time
-      // 😅 Let's see how can I handle at frontend
+      //! Simulate a successful sync 80% of the time, an error 20% of the time
+      //! 😅 Let's see how can I handle at frontend
       if (Math.random() < 0.8) {
         this.devices[deviceIndex] = {
           ...this.devices[deviceIndex],

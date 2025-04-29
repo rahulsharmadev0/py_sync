@@ -14,6 +14,7 @@ class DashboardNavigationBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: 350,
+      height: 42,
       child: ClipRRect(
         borderRadius: const BorderRadius.all(Radius.circular(12)),
         clipBehavior: Clip.hardEdge,
@@ -99,47 +100,41 @@ class DashboardState extends State<DashboardScreen> with TickerProviderStateMixi
           ),
           body: BlocBuilder<DeviceBloc, DeviceState>(
             builder: (context, state) {
+              var children = [
+                DashboardNavigationBar(),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextButton.icon(
+                      onPressed:
+                          () => context.read<DeviceBloc>().add(RefreshDeviceEvent()),
+                      icon: Icon(Icons.refresh, color: Colors.black),
+                      label: Text('Refresh', style: TextStyle(color: Colors.black)),
+                    ),
+
+                    TextButton.icon(
+                      onPressed: context.read<AuthRepository>().signOut,
+                      icon: Icon(Icons.logout, color: Colors.black),
+                      label: Text('Logout', style: TextStyle(color: Colors.black)),
+                    ),
+                  ],
+                ),
+              ];
+              var width = MediaQuery.sizeOf(context).width;
               return Center(
                 child: SizedBox(
-                  width: MediaQuery.sizeOf(context).width * 0.8,
+                  width: width * 0.9,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const SizedBox(height: 20),
-                      SizedBox(
-                        height: 42,
-                        child: Row(
-                          children: [
-                            DashboardNavigationBar(),
-                            Spacer(),
-                            TextButton.icon(
-                              onPressed: () {
-                                var read = context.read<DeviceBloc>();
-                                return read.add(RefreshDeviceEvent());
-                              },
-                              icon:
-                                  state.status == DeviceStatus.syncing
-                                      ? CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: Colors.black,
-                                      )
-                                      : const Icon(Icons.refresh, color: Colors.black),
-                              label: Text(
-                                'Refresh',
-                                style: TextStyle(color: Colors.black),
-                              ),
-                            ),
-                            TextButton.icon(
-                              onPressed: context.read<AuthRepository>().signOut,
-                              icon: const Icon(Icons.logout, color: Colors.black),
-                              label: Text(
-                                'Logout',
-                                style: TextStyle(color: Colors.black),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      width > 800
+                          ? Row(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: children,
+                          )
+                          : Column(children: children),
 
                       Expanded(
                         child: Container(

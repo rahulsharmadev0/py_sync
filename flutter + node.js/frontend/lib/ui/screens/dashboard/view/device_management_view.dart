@@ -5,13 +5,15 @@ import 'package:py_sync/logic/models/device.dart';
 import 'package:py_sync/ui/screens/dashboard/bloc/device_bloc.dart';
 
 import 'package:py_sync/ui/screens/dashboard/view/common.dart';
+import 'package:py_sync/ui/screens/dashboard/view/pagination_controls.dart';
 
 class DeviceManagementView extends StatelessWidget {
   const DeviceManagementView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final devices = context.select((DeviceBloc bloc) => bloc.state.devices);
+    final deviceState = context.select((DeviceBloc bloc) => bloc.state);
+    final devices = deviceState.devices;
 
     return Column(
       children: [
@@ -25,6 +27,15 @@ class DeviceManagementView extends StatelessWidget {
         ),
 
         TableBody(rows: devices.map(buildDataRow).toList()),
+
+        // Add pagination controls
+        PaginationControls(
+          currentPage: deviceState.currentPage,
+          totalPages: deviceState.totalPages,
+          onPageChanged: (int page) {
+            context.read<DeviceBloc>().add(LoadPageEvent(page));
+          },
+        ),
       ],
     );
   }
@@ -32,9 +43,6 @@ class DeviceManagementView extends StatelessWidget {
   Widget buildDataRow(Device device) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
-      decoration: BoxDecoration(
-        border: Border(top: BorderSide(color: Colors.grey[200]!)),
-      ),
       child: Row(
         children: [
           Expanded(flex: 3, child: DeviceIdCell(device)),

@@ -14,7 +14,7 @@ class AuthRepositoryImpl extends AuthRepository {
   @override
   FutureOr<User> register(String username, String password) async {
     if (state != null) return AuthRepository.currentUser = state!;
-    return handleErrors(() async {
+    return handleErrorsAndRetry(() async {
       var jwtToken = await authApi.register(username, password);
       var newState = User(username: username, jwtToken: jwtToken);
       emit(newState);
@@ -25,7 +25,7 @@ class AuthRepositoryImpl extends AuthRepository {
   @override
   FutureOr<User> login(String username, String password) async {
     if (state != null) return AuthRepository.currentUser = state!;
-    return handleErrors(() async {
+    return handleErrorsAndRetry(() async {
       var jwtToken = await authApi.login(username, password);
       var newState = User(username: username, jwtToken: jwtToken);
       emit(newState);

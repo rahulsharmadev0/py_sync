@@ -7,15 +7,39 @@ class DevicesApi {
 
   const DevicesApi({required this.baseUrl});
 
-  Future<List<Device>> getAllDevices(String token) async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/pisync/devices'),
-      headers: {'Authorization': 'Bearer $token'},
-    );
+  Future<Map<String, dynamic>> getAllDevices(
+    String token, {
+    int page = 1,
+    int limit = 10,
+    String? syncStatusCode,
+    String? sortBy,
+    String? order,
+  }) async {
+    // Build query parameters
+    final queryParams = <String, String>{};
+    queryParams['page'] = page.toString();
+    queryParams['limit'] = limit.toString();
+
+    if (syncStatusCode != null) {
+      queryParams['sync_status_code'] = syncStatusCode;
+    }
+
+    if (sortBy != null) {
+      queryParams['sort_by'] = sortBy;
+    }
+
+    if (order != null) {
+      queryParams['order'] = order;
+    }
+
+    final uri = Uri.parse(
+      '$baseUrl/pisync/devices',
+    ).replace(queryParameters: queryParams);
+
+    final response = await http.get(uri, headers: {'Authorization': 'Bearer $token'});
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return (data['devices'] as List).map((device) => Device.fromJson(device)).toList();
+      return jsonDecode(response.body);
     } else {
       throw Exception(jsonDecode(response.body)['message']);
     }

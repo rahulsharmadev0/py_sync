@@ -8,6 +8,13 @@ sealed class DeviceEvent {
 
 class RefreshDeviceEvent extends DeviceEvent {}
 
+class LoadPageEvent extends DeviceEvent {
+  final int page;
+  final int? limit;
+
+  LoadPageEvent(this.page, {this.limit});
+}
+
 class SyncSingleDeviceEvent extends DeviceEvent {
   final String deviceId;
   SyncSingleDeviceEvent(this.deviceId);
@@ -19,7 +26,22 @@ class DeviceState {
   final DeviceStatus status;
   final List<Device> devices;
   final String? errorMessage;
-  const DeviceState({required this.status, this.devices = const [], this.errorMessage});
+
+  // Pagination fields
+  final int currentPage;
+  final int totalPages;
+  final int totalItems;
+  final int itemsPerPage;
+
+  const DeviceState({
+    required this.status,
+    this.devices = const [],
+    this.errorMessage,
+    this.currentPage = 1,
+    this.totalPages = 1,
+    this.totalItems = 0,
+    this.itemsPerPage = 10,
+  });
 
   const DeviceState.initial() : this(status: DeviceStatus.idle);
 
@@ -27,11 +49,19 @@ class DeviceState {
     DeviceStatus? status,
     List<Device>? devices,
     String? errorMessage,
+    int? currentPage,
+    int? totalPages,
+    int? totalItems,
+    int? itemsPerPage,
   }) {
     return DeviceState(
       status: status ?? this.status,
       devices: devices ?? this.devices,
       errorMessage: errorMessage ?? this.errorMessage,
+      currentPage: currentPage ?? this.currentPage,
+      totalPages: totalPages ?? this.totalPages,
+      totalItems: totalItems ?? this.totalItems,
+      itemsPerPage: itemsPerPage ?? this.itemsPerPage,
     );
   }
 }
@@ -41,10 +71,11 @@ class DeviceBloc extends Bloc<DeviceEvent, DeviceState> {
 
   DeviceBloc(this.devicesRepos) : super(DeviceState.initial()) {
     on<RefreshDeviceEvent>(_handleRefreshDevices);
+    on<LoadPageEvent>(_handleLoadPage);
     on<SyncSingleDeviceEvent>(_handleSyncDevice);
   }
 
-  /// Handles the refresh devices event by fetching all devices
+  /// Handles the refresh devices event by fetching all devices with pagination (first page)
   Future<void> _handleRefreshDevices(
     RefreshDeviceEvent event,
     Emitter<DeviceState> emit,
@@ -55,8 +86,56 @@ class DeviceBloc extends Bloc<DeviceEvent, DeviceState> {
     emit(state.copyWith(status: DeviceStatus.syncing));
 
     try {
-      final devices = await devicesRepos.getAllDevices();
-      emit(state.copyWith(status: DeviceStatus.synced, devices: devices));
+      final response = await devicesRepos.getDevicesWithPagination(
+        page: state.currentPage,
+        limit: state.itemsPerPage,
+      );
+
+      emit(
+        state.copyWith(
+          status: DeviceStatus.synced,
+          devices: response.devices,
+          currentPage: response.currentPage,
+          totalPages: response.totalPages,
+          totalItems: response.totalItems,
+          itemsPerPage: response.limit,
+        ),
+      );
+    } catch (e) {
+      emit(
+        state.copyWith(
+          status: DeviceStatus.error,
+          errorMessage: 'Failed to fetch devices: $e',
+        ),
+      );
+    }
+  }
+
+  /// Handles loading a specific page of devices
+  Future<void> _handleLoadPage(LoadPageEvent event, Emitter<DeviceState> emit) async {
+    // Skip if already loading
+    if (state.status == DeviceStatus.syncing) return;
+
+    emit(state.copyWith(status: DeviceStatus.syncing));
+
+    try {
+      final response = await devicesRepos.getDevicesWithPagination(
+        page: event.page,
+        limit: event.limit ?? state.itemsPerPage,
+        sortBy: 'last_sync_time',
+        order: 'desc',
+      );
+
+      emit(
+        state.copyWith(
+          status: DeviceStatus.synced,
+          devices: response.devices,
+          currentPage: response.currentPage,
+          totalPages: response.totalPages,
+          totalItems: response.totalItems,
+          itemsPerPage: response.limit,
+        ),
+      );
     } catch (e) {
       emit(
         state.copyWith(

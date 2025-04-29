@@ -28,7 +28,7 @@ const createUsers = async (): Promise<User[]> => {
       password: await createHashPassword("rahulsharmadev123"),
     },
     {
-      id: 2,
+      id: 3,
       username: "admin",
       password: await createHashPassword("admin123"),
     },

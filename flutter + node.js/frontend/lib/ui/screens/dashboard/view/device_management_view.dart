@@ -2,6 +2,7 @@ import 'package:bloc_suite/bloc_suite.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:py_sync/logic/models/device.dart';
+import 'package:py_sync/ui/screens/dashboard/bloc/common_state_events.dart';
 import 'package:py_sync/ui/screens/dashboard/bloc/device_bloc.dart';
 
 import 'package:py_sync/ui/screens/dashboard/view/common.dart';
@@ -45,7 +46,14 @@ class DeviceManagementView extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
       child: Row(
         children: [
-          Expanded(flex: 3, child: DeviceIdCell(device)),
+          Expanded(
+            flex: 3,
+            child: DeviceIdCell(
+              device.deviceId,
+              deviceName: device.name,
+              deviceType: device.type ?? '',
+            ),
+          ),
           Expanded(flex: 3, child: FormetDateTime(device.lastAttemptAt)),
           Expanded(flex: 2, child: StatusBadge(device.syncStatusCode)),
           Expanded(flex: 2, child: SyncNowButton(device)),

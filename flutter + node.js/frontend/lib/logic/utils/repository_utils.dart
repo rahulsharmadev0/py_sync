@@ -35,7 +35,7 @@ abstract class CachedState<T> extends HydratedCubit<T> {
 }
 
 /// Mixin to provide error handling behavior
-mixin ErrorHandlingMixin {
+mixin ErrorHandlingAndRetryMixin {
   Future<T> handleErrorsAndRetry<T, R>(
     Future<T> Function() operation, {
     String? errorPrefix,

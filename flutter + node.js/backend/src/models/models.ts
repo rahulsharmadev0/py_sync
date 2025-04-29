@@ -16,6 +16,14 @@ export interface Device {
   last_attempt_at: string | null;
 }
 
+export interface Logs {
+  device_id: string;
+  name: string;
+  type: string;
+  error_message: string | null;
+  last_attempt_at: string | null;
+}
+
 // Could be possible Sync Status codes
 // While pi device is syncing to server
 export enum SyncStatusCode {

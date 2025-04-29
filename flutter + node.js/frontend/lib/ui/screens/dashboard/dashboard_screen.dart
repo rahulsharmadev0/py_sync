@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:py_sync/logic/repositories/auth_repository.dart';
 import 'package:py_sync/logic/repositories/devices_repository.dart';
+import 'package:py_sync/logic/repositories/logs_repository.dart';
+import 'package:py_sync/ui/screens/dashboard/bloc/common_state_events.dart';
 import 'package:py_sync/ui/screens/dashboard/bloc/device_bloc.dart';
+import 'package:py_sync/ui/screens/dashboard/bloc/error_logs_bloc.dart';
 import 'package:py_sync/ui/screens/dashboard/view/device_management_view.dart';
 import 'package:py_sync/ui/screens/dashboard/view/recent_errors_view.dart';
 
@@ -63,10 +66,20 @@ class DashboardState extends State<DashboardScreen> with TickerProviderStateMixi
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create:
-          (context) =>
-              DeviceBloc(context.read<DevicesRepository>())..add(RefreshDeviceEvent()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) {
+            return DeviceBloc(context.read<DevicesRepository>())
+              ..add(RefreshDeviceEvent());
+          },
+        ),
+        BlocProvider(
+          create: (context) {
+            return ErrorLogsBloc(context.read<LogsRepository>())..add(RefreshLogsEvent());
+          },
+        ),
+      ],
       child: BlocListener<DeviceBloc, DeviceState>(
         listener: (context, state) {
           if (state.status == DeviceStatus.error) {
@@ -107,7 +120,11 @@ class DashboardState extends State<DashboardScreen> with TickerProviderStateMixi
                   children: [
                     TextButton.icon(
                       onPressed:
-                          () => context.read<DeviceBloc>().add(RefreshDeviceEvent()),
+                          () =>
+                              _tabController.index == 0
+                                  ? context.read<DeviceBloc>().add(RefreshDeviceEvent())
+                                  : context.read<ErrorLogsBloc>().add(RefreshLogsEvent()),
+
                       icon: Icon(Icons.refresh, color: Colors.black),
                       label: Text('Refresh', style: TextStyle(color: Colors.black)),
                     ),

@@ -6,8 +6,7 @@ import 'package:py_sync/logic/repositories/devices_repository.dart';
 
 class DevicesRepositoryImpl extends DevicesRepository {
   final DevicesApi devicesApi;
-  DevicesRepositoryImpl({List<Device>? initalValue, required this.devicesApi})
-    : super(initalValue ?? []);
+  DevicesRepositoryImpl({List<Device>? initalValue, required this.devicesApi});
 
   @override
   FutureOr<List<Device>> getAllDevices() async {
@@ -42,7 +41,6 @@ class DevicesRepositoryImpl extends DevicesRepository {
         }
       }
 
-      emit(devices);
       return devices;
     }, errorPrefix: 'Failed to fetch devices');
   }
@@ -93,11 +91,6 @@ class DevicesRepositoryImpl extends DevicesRepository {
         }
       }
 
-      // Only update the state if we're on the first page
-      if (page == 1) {
-        emit(devices);
-      }
-
       return PaginatedDevicesResponse(
         devices: devices,
         currentPage: response['page'] ?? 1,
@@ -116,13 +109,6 @@ class DevicesRepositoryImpl extends DevicesRepository {
     }
     return handleErrorsAndRetry(() async {
       final device = await devicesApi.syncDevice(jwtToken, deviceId);
-
-      final index = state.indexWhere((d) => d.deviceId == device.deviceId);
-      if (index != -1) {
-        state[index] = device;
-      } else {
-        state.add(device); // This case should not happen, but just in case
-      }
       return device;
     }, errorPrefix: 'Failed to fetch device');
   }

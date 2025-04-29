@@ -19,10 +19,7 @@ class PaginatedDevicesResponse {
   });
 }
 
-abstract class DevicesRepository extends CachedState<List<Device>>
-    with ErrorHandlingMixin {
-  DevicesRepository(super.state);
-
+abstract class DevicesRepository with ErrorHandlingAndRetryMixin {
   // The original method (will still be used for compatibility)
   FutureOr<List<Device>> getAllDevices();
 

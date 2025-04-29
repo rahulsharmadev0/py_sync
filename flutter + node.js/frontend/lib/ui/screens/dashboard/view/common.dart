@@ -85,21 +85,28 @@ class TableHeader extends StatelessWidget {
 }
 
 class DeviceIdCell extends StatelessWidget {
-  final Device device;
-  const DeviceIdCell(this.device, {super.key});
+  final String deviceId;
+  final String deviceName;
+  final String deviceType;
+  const DeviceIdCell(
+    this.deviceId, {
+    super.key,
+    this.deviceName = '',
+    this.deviceType = '',
+  });
 
   @override
   Widget build(BuildContext context) {
     var children = [
       Text(
-        device.deviceId,
+        deviceId,
         style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.w500),
       ),
       if (context.$size.width > 900)
         SizedBox(
           height: 24,
           child: FittedBox(
-            child: Tooltip(message: device.type, child: Chip(label: Text(device.name))),
+            child: Tooltip(message: deviceType, child: Chip(label: Text(deviceName))),
           ),
         ),
     ];

@@ -1,6 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:py_sync/logic/models/device.dart';
 import 'package:py_sync/logic/repositories/devices_repository.dart';
+import 'package:py_sync/ui/screens/dashboard/bloc/common_state_events.dart';
+import 'package:py_sync/logic/models/device.dart';
 
 sealed class DeviceEvent {
   const DeviceEvent();

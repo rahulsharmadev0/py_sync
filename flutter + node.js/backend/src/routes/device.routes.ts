@@ -10,6 +10,7 @@ router.use(authMiddleware);
 
 // Device routes
 router.get("/", deviceController.getAllDevices);
+router.get("/logs", deviceController.getAllLogs);
 router.get("/:id", deviceController.syncDevice);
 
 export const deviceRoutes = router;

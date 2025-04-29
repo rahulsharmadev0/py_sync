@@ -1,4 +1,4 @@
-# Device Sync Management API
+# Pi Device Sync Management API
 
 Node.js backend server built with TypeScript and Express to manage device synchronization.
 

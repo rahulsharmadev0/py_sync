@@ -3,6 +3,7 @@ enum SyncStatusCode {
   badRequest(400),
   notFound(404),
   serverError(500),
+  syncing(-1),
   unknown(0);
 
   final int code;
@@ -62,5 +63,25 @@ class Device {
       'error_message': errorMessage,
       'last_attempt_at': lastAttemptAt?.toIso8601String(),
     };
+  }
+
+  Device copyWith({
+    String? deviceId,
+    String? name,
+    SyncStatusCode? syncStatusCode,
+    String? type,
+    DateTime? lastSyncAt,
+    String? errorMessage,
+    DateTime? lastAttemptAt,
+  }) {
+    return Device(
+      deviceId: deviceId ?? this.deviceId,
+      name: name ?? this.name,
+      type: type ?? this.type,
+      lastSyncAt: lastSyncAt ?? this.lastSyncAt,
+      syncStatusCode: syncStatusCode ?? this.syncStatusCode,
+      errorMessage: errorMessage ?? this.errorMessage,
+      lastAttemptAt: lastAttemptAt ?? this.lastAttemptAt,
+    );
   }
 }

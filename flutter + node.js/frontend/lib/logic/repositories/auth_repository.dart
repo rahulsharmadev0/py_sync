@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:py_sync/logic/models/user.dart';
 import 'package:py_sync/logic/utils/repository_utils.dart';
 
-abstract class AuthRepository extends CachedState<User?> with ErrorHandlingMixin {
+abstract class AuthRepository extends CachedState<User?> with ErrorHandlingAndRetryMixin {
   AuthRepository(super.state);
 
   static User? currentUser;
@@ -12,6 +12,5 @@ abstract class AuthRepository extends CachedState<User?> with ErrorHandlingMixin
 
   FutureOr<void> login(String username, String password);
 
-  FutureOr<void> signOut() async =>
-      UnimplementedError('signOut() has not been implemented.');
+  FutureOr<void> signOut();
 }
